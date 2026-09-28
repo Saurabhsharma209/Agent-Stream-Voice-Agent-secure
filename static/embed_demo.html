@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embeddable Voice AI Agent Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #090b11;
+            --card-bg: rgba(22, 28, 45, 0.55);
+            --accent: #3b82f6;
+            --accent-grad: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --text: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: rgba(255, 255, 255, 0.08);
+            --code-bg: #1e1e2e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 1.5rem;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            background: var(--accent-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.75rem;
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.25rem;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a6accd;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block .tag { color: #f07178; }
+        .code-block .attr { color: #c792ea; }
+        .code-block .val { color: #ecc48d; }
+        .code-block .comment { color: #676e95; font-style: italic; }
+
+        .btn-copy {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-copy:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .instructions-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-grad);
+            color: white;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .step-content p {
+            margin-bottom: 0;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Embeddable Voice AI Agent</h1>
+            <p>Embed the interactive voice agent card on any website with just 2 lines of code!</p>
+        </div>
+
+        <div class="card">
+            <h2>📦 Quick Embed Code</h2>
+            <p>Copy and paste this snippet into the HTML of any web page right before the <code>&lt;/body&gt;</code> tag:</p>
+
+            <div class="code-block">
+                <button class="btn-copy" onclick="copyCode()">Copy Code</button>
+                <pre id="embed-code">
+<span class="comment">&lt;!-- 1. Voice Agent Custom HTML Tag --&gt;</span>
+<span class="tag">&lt;agent-stream-voice</span> 
+    <span class="attr">agent-id</span>=<span class="val">"default"</span> 
+    <span class="attr">server-url</span>=<span class="val">"http://localhost:5000"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/agent-stream-voice&gt;</span>
+
+<span class="comment">&lt;!-- 2. Async Web Component Script --&gt;</span>
+<span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="val">"http://localhost:5000/static/voice-agent-widget.js"</span> <span class="attr">async</span><span class="tag">&gt;&lt;/script&gt;</span></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🚀 How it Works</h2>
+            <ul class="instructions-list">
+                <li class="instruction-item">
+                    <div class="step-num">1</div>
+                    <div class="step-content">
+                        <h3>Native Browser Custom Element</h3>
+                        <p>Uses modern Web Components (Shadow DOM) so its styles and behavior will never interfere with the host website's CSS.</p>
+                    </div>
+                </li>
+                <li class="instruction-item">
+                    <div class="step-num">2</div>
+                    <div class="step-content">
+                        <h3>WebAudio Speech Capture</h3>
+                        <p>When the user clicks "Start Conversation", microphone access is requested and 16kHz PCM audio is streamed over WebSockets.</p>
+                    </div>
+                </li>
+                <li class="instruction-item">
+                    <div class="step-num">3</div>
+                    <div class="step-content">
+                        <h3>Low-Latency Speech-to-Speech</h3>
+                        <p>Your backend engine processes speech via OpenAI Realtime or Deepgram + Gemini + Cartesia and streams back natural voice responses.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- LIVE DEMO EMBED OF THE CUSTOM TAG -->
+    <agent-stream-voice agent-id="default" id="demo-agent-tag"></agent-stream-voice>
+    <script src="/static/voice-agent-widget.js" async></script>
+
+    <script>
+        // Dynamically update the code block to reflect the live server origin
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentOrigin = window.location.origin;
+            const embedCodeEl = document.getElementById('embed-code');
+            const demoTag = document.getElementById('demo-agent-tag');
+            
+            if (demoTag) {
+                demoTag.setAttribute('server-url', currentOrigin);
+            }
+
+            if (embedCodeEl) {
+                embedCodeEl.innerHTML = `
+<span class="comment">&lt;!-- 1. Voice Agent Custom HTML Tag --&gt;</span>
+<span class="tag">&lt;agent-stream-voice</span> 
+    <span class="attr">agent-id</span>=<span class="val">"default"</span> 
+    <span class="attr">server-url</span>=<span class="val">"${currentOrigin}"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/agent-stream-voice&gt;</span>
+
+<span class="comment">&lt;!-- 2. Async Web Component Script --&gt;</span>
+<span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="val">"${currentOrigin}/static/voice-agent-widget.js"</span> <span class="attr">async</span><span class="tag">&gt;&lt;/script&gt;</span>`;
+            }
+        });
+
+        function copyCode() {
+            const text = document.getElementById('embed-code').innerText;
+            navigator.clipboard.writeText(text);
+            alert('Embed code copied to clipboard!');
+        }
+    </script>
+</body>
+</html>

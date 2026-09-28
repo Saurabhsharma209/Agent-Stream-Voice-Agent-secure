@@ -1,0 +1,132 @@
+services:
+  # Container 1: The Voice Bot Application
+  voice-bot:
+    image: chauwkdocker/agent-stream-voice-agent:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
+    container_name: voice-bot
+    
+    environment:
+      # SIP Configuration
+      - USE_SIP_TRUNK=true
+      - SIP_SERVER_PORT=5060
+      - SIP_SERVER_HOST=0.0.0.0
+      - INBOUND_SIP_ENABLED=true
+      
+      # Outbound SIP (optional)
+      - OUTBOUND_SIP_ENABLED=false
+      - SIP_REALM=exotel.com
+      - EXOTEL_OUTBOUND_PROXY=proxy.exotel.in:5060
+      
+      # OpenAI Realtime Fallback
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL}
+      - OPENAI_VOICE=coral
+      
+      # Gemini Configuration
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=gemini-2.5-flash
+      
+      # RAG Config
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - DATABASE_URL=${DATABASE_URL}
+      - DB_URL=${DB_URL}
+
+      
+      # Bot Personality
+      - COMPANY_NAME=${COMPANY_NAME:-Your Company}
+      - SALES_BOT_NAME=${SALES_BOT_NAME:-Zara}
+      - SALES_REP_NAME=${SALES_BOT_NAME:-Zara}
+      
+      # Audio
+      - DEEPGRAM_LANGUAGE=${DEEPGRAM_LANGUAGE}
+      - SAMPLE_RATE=24000
+      - AUDIO_CHUNK_SIZE=200
+
+      
+      # Server
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=5000
+      - LOG_LEVEL=INFO
+      
+      # Production
+      - PRODUCTION_MODE=true
+    
+    # Use .env file for secrets
+    env_file: .env
+    
+    volumes:
+      - /home/ubuntu/project-gcp-key.json:/app/project-gcp-key.json
+    
+    ports:
+      - "5060:5060/tcp"
+      - "5060:5060/udp"
+      - "5000:5000/tcp"
+    
+    depends_on:
+      - chromadb
+    
+    networks:
+      - voice-bot-network
+      
+    restart: always
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s = socket.socket(); s.connect(('localhost', 5060)); s.close()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Container 2: Chroma Vector Database Server
+  chromadb:
+    image: chromadb/chroma:1.5.9
+    container_name: chromadb
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/data
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma-data:/data
+    networks:
+      - voice-bot-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  voice-bot-network:
+    driver: bridge
+
+volumes:
+  chroma-data:
+

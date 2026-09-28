@@ -1,0 +1,41 @@
+# Voice AI Bot Dependencies
+
+# Core dependencies
+python-dotenv
+openai
+websockets
+fastapi
+uvicorn
+aiohttp
+
+# Audio processing
+pydub
+numpy
+
+# SIP Trunking Support (REQUIRED)
+# pjsua2-py (Compiled from source in Docker; run 'pip install pjsua2-py' manually on host if needed)
+PyAudio
+
+# Optional: for better audio quality
+# librosa
+# soundfile
+
+# Modular Pipeline dependencies
+deepgram-sdk
+google-generativeai
+google-genai
+sarvamai
+
+# RAG & Database dependencies
+chromadb
+boto3
+python-docx
+python-pptx
+beautifulsoup4
+PyPDF2
+python-multipart
+playwright
+motor
+openpyxl
+google-auth
+google-api-python-client

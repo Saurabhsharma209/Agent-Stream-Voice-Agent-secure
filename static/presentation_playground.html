@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI Agent Integration Presentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --card-bg: rgba(22, 28, 45, 0.45);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #3b82f6;
+            --accent-grad: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --text: #f3f4f6;
+            --text-muted: #9ca3af;
+            --editor-bg: #1e1e2f;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+            overflow-x: hidden;
+        }
+
+        header {
+            width: 100%;
+            padding: 1.5rem 3rem;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: var(--accent-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .badge-live {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 2rem;
+            padding: 2.5rem 3rem;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Presentation Info Card */
+        .intro-banner {
+            grid-column: 1 / -1;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .intro-text h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .intro-text p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Left Side: Code Editor Workspace */
+        .workspace-editor {
+            display: flex;
+            flex-direction: column;
+            background: var(--editor-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+        }
+
+        .editor-header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .dot-red { background: #ef4444; }
+        .dot-yellow { background: #f59e0b; }
+        .dot-green { background: #10b981; }
+
+        .editor-tab {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-family: 'Fira Code', monospace;
+            background: var(--editor-bg);
+            padding: 6px 16px;
+            border-radius: 8px 8px 0 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: none;
+            margin-bottom: -13px;
+        }
+
+        .editor-body {
+            flex: 1;
+            padding: 24px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #d4d4d4;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .line-numbers {
+            color: #858585;
+            text-align: right;
+            padding-right: 20px;
+            user-select: none;
+            display: inline-block;
+        }
+
+        .code-content {
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        /* Code coloring */
+        .token-tag { color: #569cd6; }
+        .token-attr { color: #9cdcfe; }
+        .token-val { color: #ce9178; }
+        .token-comment { color: #6a9955; font-style: italic; }
+
+        .highlight-box {
+            background: rgba(59, 130, 246, 0.12);
+            border-left: 4px solid var(--accent);
+            padding: 8px 12px;
+            margin: 12px 0;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .highlight-box::after {
+            content: "👈 Paste Code Here";
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--accent-grad);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            pointer-events: none;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-50%) translateX(0); }
+            50% { transform: translateY(-50%) translateX(-6px); }
+        }
+
+        .editor-footer {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-apply {
+            font-family: 'Outfit', sans-serif;
+            background: var(--accent-grad);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Right Side: Website Browser Mockup */
+        .workspace-preview {
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+            color: #0f172a;
+            position: relative;
+        }
+
+        .preview-browser-bar {
+            background: #f1f5f9;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .preview-address-bar {
+            flex: 1;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preview-viewport {
+            flex: 1;
+            padding: 40px;
+            background: #f8fafc;
+            position: relative;
+            min-height: 480px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .mock-site-content {
+            max-width: 440px;
+            transition: opacity 0.3s;
+        }
+
+        .mock-site-content h3 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: #1e293b;
+        }
+
+        .mock-site-content p {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .mock-site-btn {
+            padding: 10px 24px;
+            background: #0f172a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Overlay helper guide */
+        .overlay-guide {
+            position: absolute;
+            inset: 0;
+            background: rgba(11, 15, 25, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            transition: opacity 0.5s ease;
+        }
+
+        .overlay-guide h3 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: var(--accent-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .overlay-guide p {
+            color: var(--text-muted);
+            max-width: 400px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        /* Active Connection Line Visual */
+        .connection-beam {
+            position: absolute;
+            top: 50%;
+            left: -50px;
+            width: 100px;
+            height: 4px;
+            background: var(--accent);
+            box-shadow: 0 0 16px var(--accent);
+            opacity: 0;
+            z-index: 99;
+            pointer-events: none;
+        }
+
+        @keyframes beam-shoot {
+            0% { left: 0%; opacity: 1; width: 20px; }
+            50% { width: 100px; }
+            100% { left: 100%; opacity: 0; width: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>Voice AI Integration Portal</h1>
+            <p>Enterprise Click-to-Talk Component Embed Showcase</p>
+        </div>
+        <div class="badge-live">
+            <span class="pulse-dot"></span> Live Bot Stream Ready
+        </div>
+    </header>
+
+    <main>
+        <div class="intro-banner">
+            <div class="intro-text">
+                <h2>Presentation Playground</h2>
+                <p>Present this interactive mock editor to show exactly how pasting two lines adds the voice agent instantly.</p>
+            </div>
+        </div>
+
+        <!-- Left Column: VS Code Mock -->
+        <div class="workspace-editor">
+            <div class="editor-header">
+                <div class="window-controls">
+                    <span class="dot-btn dot-red"></span>
+                    <span class="dot-btn dot-yellow"></span>
+                    <span class="dot-btn dot-green"></span>
+                </div>
+                <div class="editor-tab">index.html</div>
+                <div></div>
+            </div>
+
+            <div class="editor-body">
+                <div class="line-numbers">
+                    1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13
+                </div>
+                <div class="code-content">
+                    <span class="token-tag">&lt;!DOCTYPE html&gt;</span><br>
+                    <span class="token-tag">&lt;html</span> <span class="token-attr">lang</span>=<span class="token-val">"en"</span><span class="token-tag">&gt;</span><br>
+                    <span class="token-tag">&lt;head&gt;</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="token-tag">&lt;title&gt;</span>Our Company Website<span class="token-tag">&lt;/title&gt;</span><br>
+                    <span class="token-tag">&lt;/head&gt;</span><br>
+                    <span class="token-tag">&lt;body&gt;</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="token-tag">&lt;h1&gt;</span>Welcome to Our Platform<span class="token-tag">&lt;/h1&gt;</span><br>
+                    
+                    <div class="highlight-box" id="code-snippet-box">
+                        <span class="token-comment">&lt;!-- 1. AI voice custom tag --&gt;</span><br>
+                        <span class="token-tag">&lt;agent-stream-voice</span> <span class="token-attr">agent-id</span>=<span class="token-val">"default"</span><span class="token-tag">&gt;&lt;/agent-stream-voice&gt;</span><br><br>
+                        <span class="token-comment">&lt;!-- 2. Embedded logic script --&gt;</span><br>
+                        <span class="token-tag">&lt;script</span> <span class="token-attr">src</span>=<span class="token-val">"<span id="script-src-url">http://localhost:5000</span>/static/voice-agent-widget.js"</span> <span class="token-attr">async</span><span class="token-tag">&gt;&lt;/script&gt;</span>
+                    </div>
+
+                    <span class="token-tag">&lt;/body&gt;</span><br>
+                    <span class="token-tag">&lt;/html&gt;</span>
+                </div>
+            </div>
+
+            <div class="editor-footer">
+                <span style="color: var(--text-muted); font-size: 0.85rem;">Ready to apply to live preview</span>
+                <button class="btn-apply" onclick="applyWidgetCode()">
+                    ⚡ Apply Code to Preview
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Column: Target Site Browser Mock -->
+        <div class="workspace-preview">
+            <div class="preview-browser-bar">
+                <div class="window-controls">
+                    <span class="dot-btn" style="background:#cbd5e1"></span>
+                    <span class="dot-btn" style="background:#cbd5e1"></span>
+                    <span class="dot-btn" style="background:#cbd5e1"></span>
+                </div>
+                <div class="preview-address-bar">
+                    🔒 <span id="address-url">https://your-company-website.com</span>
+                </div>
+            </div>
+
+            <div class="preview-viewport" id="preview-viewport">
+                <!-- Overlay Guide (Shows before applying code) -->
+                <div class="overlay-guide" id="viewport-overlay">
+                    <h3>Step 1: Paste the Code</h3>
+                    <p>Pasting the two-line integration code shown in the editor on the left is all that is required.</p>
+                    <button class="mock-site-btn" style="background: var(--accent); color: white;" onclick="applyWidgetCode()">
+                        Click "Apply Code" to simulated page
+                    </button>
+                </div>
+
+                <div class="mock-site-content">
+                    <h3>Grow Smarter.</h3>
+                    <p>Our unified platform helps you orchestrate workflows, manage metrics, and dynamically engage leads.</p>
+                    <button class="mock-site-btn" disabled>Explore Platform</button>
+                </div>
+
+                <!-- Dynamic container for loaded voice element -->
+                <div id="injected-widget-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const origin = window.location.origin;
+            document.getElementById('script-src-url').innerText = origin;
+        });
+
+        function applyWidgetCode() {
+            // Hide guide overlay
+            const overlay = document.getElementById('viewport-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 500);
+
+            // Animate line highlight box
+            const highlightBox = document.getElementById('code-snippet-box');
+            highlightBox.style.background = 'rgba(16, 185, 129, 0.15)';
+            highlightBox.style.borderLeftColor = 'var(--success)';
+
+            // Trigger beam animation
+            const beam = document.createElement('div');
+            beam.className = 'connection-beam';
+            document.body.appendChild(beam);
+            beam.style.animation = 'beam-shoot 1.2s ease-out forwards';
+            
+            setTimeout(() => {
+                beam.remove();
+            }, 1200);
+
+            // Inject the custom voice component and script elements into mockup preview
+            const container = document.getElementById('injected-widget-container');
+            if (container.children.length === 0) {
+                // Add the custom tag
+                const voiceTag = document.createElement('agent-stream-voice');
+                voiceTag.setAttribute('agent-id', 'default');
+                voiceTag.setAttribute('server-url', window.location.origin);
+                container.appendChild(voiceTag);
+
+                // Add the script to load the widget dynamically inside mockup
+                const scriptEl = document.createElement('script');
+                scriptEl.src = '/static/voice-agent-widget.js';
+                scriptEl.async = true;
+                container.appendChild(scriptEl);
+
+                // Flash notification overlay on preview viewport
+                const flashAlert = document.createElement('div');
+                flashAlert.style.position = 'absolute';
+                flashAlert.style.top = '24px';
+                flashAlert.style.left = '50%';
+                flashAlert.style.transform = 'translateX(-50%)';
+                flashAlert.style.background = '#10b981';
+                flashAlert.style.color = 'white';
+                flashAlert.style.padding = '8px 16px';
+                flashAlert.style.borderRadius = '20px';
+                flashAlert.style.fontSize = '0.85rem';
+                flashAlert.style.fontWeight = '600';
+                flashAlert.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                flashAlert.style.transition = 'all 0.4s';
+                flashAlert.innerText = "✨ Widget Loaded! Floating icon appears at bottom-right.";
+                document.getElementById('preview-viewport').appendChild(flashAlert);
+
+                setTimeout(() => {
+                    flashAlert.style.opacity = '0';
+                    setTimeout(() => flashAlert.remove(), 400);
+                }, 3500);
+            }
+        }
+    </script>
+</body>
+</html>

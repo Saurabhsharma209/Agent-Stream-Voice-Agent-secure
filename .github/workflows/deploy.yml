@@ -1,0 +1,107 @@
+name: Voice Agent CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # ── CI: Build & Push on GitHub-hosted runner ─────────────────────────────
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to DockerHub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
+            --build-arg OPENAI_MODEL="${{ secrets.OPENAI_MODEL }}" \
+            --build-arg OPENAI_VOICE="${{ secrets.OPENAI_VOICE }}" \
+            --build-arg SERVER_HOST="0.0.0.0" \
+            --build-arg SERVER_PORT="5002" \
+            --build-arg COMPANY_NAME="${{ secrets.COMPANY_NAME }}" \
+            --build-arg SALES_BOT_NAME="${{ secrets.SALES_BOT_NAME }}" \
+            --build-arg SAMPLE_RATE="${{ secrets.SAMPLE_RATE }}" \
+            --build-arg AUDIO_CHUNK_SIZE="${{ secrets.AUDIO_CHUNK_SIZE }}" \
+            --build-arg LOG_LEVEL="${{ secrets.LOG_LEVEL }}" \
+            --build-arg USE_SIP_TRUNK="${{ secrets.USE_SIP_TRUNK }}" \
+            --build-arg INBOUND_SIP_ENABLED="${{ secrets.INBOUND_SIP_ENABLED }}" \
+            --build-arg SIP_PUBLIC_IP="${{ secrets.SIP_PUBLIC_IP }}" \
+            --build-arg EXOTEL_API_TOKEN="${{ secrets.EXOTEL_API_TOKEN }}" \
+            --build-arg EXOTEL_ACCOUNT_SID="${{ secrets.EXOTEL_ACCOUNT_SID }}" \
+            --build-arg EXOTEL_FROM_NUMBER="${{ secrets.EXOTEL_FROM_NUMBER }}" \
+            --build-arg OUTBOUND_SIP_ENABLED="${{ secrets.OUTBOUND_SIP_ENABLED }}" \
+            --build-arg SIP_USERNAME="${{ secrets.SIP_USERNAME }}" \
+            --build-arg SIP_PASSWORD="${{ secrets.SIP_PASSWORD }}" \
+            --build-arg SIP_REALM="${{ secrets.SIP_REALM }}" \
+            --build-arg EXOTEL_OUTBOUND_PROXY="${{ secrets.EXOTEL_OUTBOUND_PROXY }}" \
+            -t ${{ secrets.DOCKER_USERNAME }}/agent-stream-voice-agent:latest .
+
+      - name: Push to DockerHub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/agent-stream-voice-agent:latest
+
+  # ── CD: Deploy on AES self-hosted runner ─────────────────────────────────
+  deploy:
+    runs-on: self-hosted
+    needs: build
+
+    steps:
+      - name: Fix workspace permissions
+        run: sudo chown -R $(whoami) . || true
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Authenticate DockerHub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: echo $DOCKER_PASSWORD | sudo docker login -u $DOCKER_USERNAME --password-stdin
+
+      - name: Stop and remove voice-bot container if running
+        run: |
+          sudo docker stop voice-bot || true
+          sudo docker rm -f voice-bot || true
+
+      - name: Deploy with Docker Compose
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+        run: |
+          cp /home/ubuntu/Agent-Stream-Voice-Agent/.env .env
+          # Overlay repo secrets that aren't yet on the persistent server .env
+          # (e.g. GOOGLE_CLIENT_ID/SECRET for the Gmail OAuth send feature,
+          # OPENAI_MODEL for the realtime engine's model version).
+          # Idempotent: replaces the line if present, appends if not.
+          for VAR in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET OPENAI_MODEL; do
+            VAL="${!VAR}"
+            if [ -n "$VAL" ]; then
+              if grep -q "^${VAR}=" .env; then
+                sed -i "s|^${VAR}=.*|${VAR}=${VAL}|" .env
+              else
+                echo "${VAR}=${VAL}" >> .env
+              fi
+            fi
+          done
+          sudo docker compose pull voice-bot
+          sudo docker compose up -d --no-recreate chromadb
+          sudo docker compose up -d --force-recreate voice-bot
+
+
+      - name: Verify containers are running
+        run: |
+          sleep 5
+          sudo docker compose ps
+
+      - name: Cleanup unused Docker images
+        run: sudo docker image prune -a -f
