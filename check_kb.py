@@ -1,8 +1,18 @@
 import asyncio
+import os
+
+from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
+load_dotenv()
+
+
 async def check():
-    client = AsyncIOMotorClient('mongodb+srv://venkatsubramanianh:5V7h98JIfgBIfwT4@cluster0.p1bke.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+    db_url = os.getenv("DB_URL") or os.getenv("DATABASE_URL")
+    if not db_url:
+        raise SystemExit("Set DB_URL (or DATABASE_URL) in your environment / .env — do not hardcode credentials.")
+
+    client = AsyncIOMotorClient(db_url)
     db = client.get_default_database()
     docs = await db['agent_kb_documents'].find().to_list(length=10)
     for doc in docs:

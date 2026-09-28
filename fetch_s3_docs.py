@@ -17,7 +17,10 @@ def main():
         region_name=os.getenv("AWS_DEFAULT_REGION", "ap-south-1")
     )
     
-    company_id = "69246e9d313a438ccdea29ac"
+    company_id = os.getenv("COMPANY_ID")
+    if not company_id:
+        print("Set COMPANY_ID in your environment / .env")
+        return
     prefix = f"documents/{company_id}/"
     
     print(f"Listing objects in s3://{bucket}/{prefix}")

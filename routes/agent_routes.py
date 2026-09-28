@@ -98,7 +98,7 @@ class AgentCreateRequest(BaseModel):
     platformAgreement: Optional[Union[str, bool]] = Field(None, json_schema_extra={"example": True})
     hinglish_mode: Optional[bool] = Field(False, json_schema_extra={"example": False})
     deepgramMulti: Optional[bool] = Field(False, json_schema_extra={"example": False}, description="If true, Deepgram STT uses language=multi (code-switching). Default is false — primary language locked. Only enable if language=multi is accurate for your use case.")
-    virtualNumber: Optional[str] = Field(None, json_schema_extra={"example": "04040377112"}, description="Exotel virtual number bound to this agent.")
+    virtualNumber: Optional[str] = Field(None, json_schema_extra={"example": "04000000000"}, description="Exotel virtual number bound to this agent.")
 
 class AgentUpdateRequest(BaseModel):
     name: Optional[str] = Field(None, description="Updated name of the AI agent.")
@@ -133,7 +133,7 @@ class SetAgentModeRequest(BaseModel):
 class AssignVirtualNumberRequest(BaseModel):
     enterprise_id: str = Field(..., json_schema_extra={"example": "enterprise_id_here"}, description="Enterprise ID")
     agent_id: str = Field(..., json_schema_extra={"example": "agent_3a2e7c8f9b1d"}, description="Agent ID or MongoDB ObjectId of the agent")
-    virtual_number: str = Field(..., json_schema_extra={"example": "04040377112"}, description="The virtual phone number to assign to this agent")
+    virtual_number: str = Field(..., json_schema_extra={"example": "04000000000"}, description="The virtual phone number to assign to this agent")
 
 class AddVoiceIdRequest(BaseModel):
     enterprise_id: str = Field(..., json_schema_extra={"example": "enterprise_id_here"}, description="Enterprise ID")

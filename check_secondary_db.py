@@ -1,21 +1,22 @@
 import asyncio
+import os
+
+from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
+load_dotenv()
+
+
 async def check():
-    client = AsyncIOMotorClient('mongodb+srv://admin:Admin%40123@cluster0.p1bke.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
-    dbs = await client.list_database_names()
-    print("Databases:", dbs)
-    for db_name in dbs:
-        db = client[db_name]
-        cols = await db.list_collection_names()
-        if 'agent_kb_documents' in cols:
-            kb_ids = ['1785558212', '1785558935', '1785559250']
-            print(f"Found collection in DB: {db_name}")
-            docs = await db['agent_kb_documents'].find({"_id": {"$in": kb_ids}}).to_list(length=100)
-            if not docs:
-                docs = await db['agent_kb_documents'].find({"agentId": "6a6cd636940c832a99bb9855"}).to_list(length=100)
-            print(f"Total docs found: {len(docs)}")
-            for doc in docs:
-                print(f"Doc ID: {doc.get('_id')}, text/content length: {len(str(doc))}, fileUrl: {doc.get('fileUrl')}")
+    db_url = os.getenv("DB_URL_SECONDARY") or os.getenv("DB_URL") or os.getenv("DATABASE_URL")
+    if not db_url:
+        raise SystemExit("Set DB_URL_SECONDARY or DB_URL in your environment / .env — do not hardcode credentials.")
+
+    agent_id = os.getenv("AGENT_ID", "")
+    client = AsyncIOMotorClient(db_url)
+    db = client.get_default_database()
+    query = {"agentId": agent_id} if agent_id else {}
+    docs = await db['agent_kb_documents'].find(query).to_list(length=100)
+    print(f"Found {len(docs)} documents")
 
 asyncio.run(check())

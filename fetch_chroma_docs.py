@@ -1,3 +1,4 @@
+import os
 import sys
 import chromadb
 from config import Config
@@ -11,8 +12,14 @@ def main():
         print(f"Failed to connect to Chroma: {e}")
         return
 
-    company_id = "69246e9d313a438ccdea29ac"
-    doc_ids = ['1785558212', '1785558935', '1785559250']
+    company_id = os.getenv("COMPANY_ID")
+    if not company_id:
+        print("Set COMPANY_ID in your environment / .env")
+        return
+    doc_ids = [d for d in os.getenv("DOC_IDS", "").split(",") if d]
+    if not doc_ids:
+        print("Set DOC_IDS (comma-separated) in your environment / .env")
+        return
     
     rm = RAGManager()
     col_name = rm._collection_name(company_id)

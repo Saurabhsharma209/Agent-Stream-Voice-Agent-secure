@@ -189,11 +189,11 @@ VOICE_BOT_MODE=modular
 # Emergency Safety Flag
 DISABLE_AI_ENGINES=false
 
-# API Keys
-OPENAI_API_KEY=sk-proj-...
-DEEPGRAM_API_KEY=a8a3507d...
-GEMINI_API_KEY=AQ.Ab8RN6...
-SARVAM_API_KEY=sk_8ht8c19y...
+# API Keys (use placeholders only — never commit real values)
+OPENAI_API_KEY=your-openai-api-key
+DEEPGRAM_API_KEY=your-deepgram-api-key
+GEMINI_API_KEY=your-gemini-api-key
+SARVAM_API_KEY=your-sarvam-api-key
 
 # Modular Pipeline Settings
 DEEPGRAM_MODEL=nova-2-phonecall
@@ -205,29 +205,30 @@ SARVAM_LANGUAGE_CODE=en-IN
 # SIP / Exotel Telephony
 USE_SIP_TRUNK=true
 INBOUND_SIP_ENABLED=true
-SIP_PUBLIC_IP=3.111.29.229
+SIP_PUBLIC_IP=YOUR_PUBLIC_IP
 SIP_SERVER_PORT=5060
-EXOTEL_ACCOUNT_SID=chauwk1m
-EXOTEL_API_KEY=f55adc46...
-EXOTEL_API_TOKEN=b29310a6...
-EXOTEL_FROM_NUMBER=04040377112
+EXOTEL_ACCOUNT_SID=your-exotel-account-sid
+EXOTEL_API_KEY=your-exotel-api-key
+EXOTEL_API_TOKEN=your-exotel-api-token
+EXOTEL_FROM_NUMBER=your-exotel-virtual-number
 EXOTEL_SUBDOMAIN=api.in.exotel.com
 
-# SMTP Email (Zoho)
-SMTP_HOST=smtp.zoho.in
+# SMTP Email
+SMTP_HOST=smtp.example.com
 SMTP_PORT=465
-SMTP_USER=hello@chauwk.com
-SMTP_PASSWORD=...
-SMTP_FROM_NAME="Chauwk Sales Team"
-SMTP_FROM_EMAIL=hello@chauwk.com
+SMTP_USER=noreply@example.com
+SMTP_PASSWORD=your-smtp-password
+SMTP_FROM_NAME="Sales Team"
+SMTP_FROM_EMAIL=noreply@example.com
 
-# Database & Storage
-DB_URL="mongodb+srv://chauwk:chauwk123@cluster0.phrdp.mongodb.net/chauwk?retryWrites=true&w=majority"
-AWS_ACCESS_KEY_ID=AKIA5P4...
-AWS_SECRET_ACCESS_KEY=4SQ+cm...
+# Database & Storage (credentials via env only)
+DB_URL=mongodb+srv://USER:PASSWORD@HOST/DB?retryWrites=true&w=majority
+AWS_ACCESS_KEY_ID=your-aws-access-key-id
+AWS_SECRET_ACCESS_KEY=your-aws-secret-access-key
 AWS_DEFAULT_REGION=ap-south-1
-AWS_S3_BUCKET_NAME=chauwk-aivoiceagent-stream
+AWS_S3_BUCKET_NAME=your-s3-bucket-name
 ```
+
 
 ---
 

@@ -1,19 +1,20 @@
 import asyncio
+import os
+
+from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
+load_dotenv()
+
+
 async def check():
-    client = AsyncIOMotorClient('mongodb+srv://admin:Admin%40123@cluster0.p1bke.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+    db_url = os.getenv("DB_URL") or os.getenv("DATABASE_URL")
+    if not db_url:
+        raise SystemExit("Set DB_URL (or DATABASE_URL) in your environment / .env — do not hardcode credentials.")
+
+    client = AsyncIOMotorClient(db_url)
     db = client.get_default_database()
-    # Check agents
-    print("--- Agents ---")
-    agents = await db['agents'].find().to_list(length=2)
-    for agent in agents:
-        print(f"Agent: {agent.get('_id')}, name: {agent.get('name')}, agentId: {agent.get('agentId')}")
-        
-    print("--- KB Documents ---")
-    docs = await db['agent_kb_documents'].find().to_list(length=5)
-    for doc in docs:
-        print(doc)
-    print(f"Total docs: {len(docs)}")
+    # Inspect collections / docs as needed using env-configured credentials only.
+    print("Connected. Collections:", await db.list_collection_names())
 
 asyncio.run(check())

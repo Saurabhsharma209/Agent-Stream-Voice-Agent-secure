@@ -138,14 +138,25 @@ ngrok-*
 *.pid
 bore
 tmp_build/
-# certs/
+
+# TLS certs / private keys (never commit)
+certs/*
+!certs/README.md
+*.key
+*.pem
+*.p12
+*.pfx
 
 # GCP Keys & SSH Keys
 project-*.json
-*.pem
+*-gcp-key.json
+service-account*.json
 
 # Local scratch files, local DBs, and instructions PDFs
 scratch/
 metadata.db
 *.docx
 *.pdf
+.env
+.env.*
+!.env.example
